@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Cost Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .calculator {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 4px;
+            display: none;
+        }
+        .pricing-table {
+            font-size: 14px;
+            margin-top: 30px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .pricing-table th, .pricing-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .pricing-table th {
+            background-color: #f2f2f2;
+        }
+        .breakdown {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Job Cost Calculator</h1>
+    
+    <div class="calculator">
+        <label for="meters">Number of Meters:</label>
+        <input type="number" id="meters" min="1" value="1">
+        
+        <label for="duration">Contract Duration (months):</label>
+        <select id="duration">
+            <option value="1">1 month</option>
+            <option value="2">2 months</option>
+            <option value="3">3 months</option>
+            <option value="6">6 months</option>
+            <option value="9">9 months</option>
+            <option value="12">12 months</option>
+        </select>
+        
+        <button onclick="calculateCost()">Calculate Cost</button>
+        
+        <div id="result" class="result">
+            <h3>Cost Summary</h3>
+            <p><strong>Rate Per Meter:</strong> $<span id="meter-rate">0.00</span></p>
+            <p><strong>Monthly Cost:</strong> $<span id="monthly-cost">0.00</span></p>
+            <p><strong>Total Contract Cost:</strong> $<span id="total-cost">0.00</span></p>
+            <p><strong>Setup Fee:</strong> $<span id="setup-fee">0.00</span></p>
+            <p><strong>Grand Total:</strong> $<span id="grand-total">0.00</span></p>
+            
+            <div class="breakdown" id="breakdown"></div>
+        </div>
+    </div>
+    
+    <table class="pricing-table">
+        <tr>
+            <th colspan="2">Pricing Reference</th>
+        </tr>
+        <tr>
+            <td>0-25 meters</td>
+            <td>$2.80 per meter per month</td>
+        </tr>
+        <tr>
+            <td>26-50 meters</td>
+            <td>$2.40 per meter per month</td>
+        </tr>
+        <tr>
+            <td>51-100 meters</td>
+            <td>$1.90 per meter per month</td>
+        </tr>
+        <tr>
+            <td>100+ meters</td>
+            <td>$1.70 per meter per month</td>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>Duration Discounts</strong></td>
+        </tr>
+        <tr>
+            <td>3 months or less</td>
+            <td>No discount</td>
+        </tr>
+        <tr>
+            <td>6 months</td>
+            <td>5% discount</td>
+        </tr>
+        <tr>
+            <td>9 months</td>
+            <td>10% discount</td>
+        </tr>
+        <tr>
+            <td>12 months</td>
+            <td>15% discount</td>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>Setup Fees</strong></td>
+        </tr>
+        <tr>
+            <td>Base fee</td>
+            <td>$100</td>
+        </tr>
+        <tr>
+            <td>Per meter</td>
+            <td>$1 per meter</td>
+        </tr>
+        <tr>
+            <td>Maximum fee</td>
+            <td>$300</td>
+        </tr>
+    </table>
+
+    <script>
+        function calculateCost() {
+            // Get inputs
+            const meters = parseInt(document.getElementById('meters').value);
+            const duration = parseInt(document.getElementById('duration').value);
+            
+            // Determine rate based on total meters
+            let rate;
+            if (meters <= 25) {
+                rate = 2.80;
+            } else if (meters <= 50) {
+                rate = 2.40;
+            } else if (meters <= 100) {
+                rate = 1.90;
+            } else {
+                rate = 1.70;
+            }
+            
+            // Calculate monthly cost
+            let monthlyRateCost = meters * rate;
+            
+            // Apply duration discount
+            let discountPercent = 0;
+            if (duration >= 12) {
+                discountPercent = 15;
+            } else if (duration >= 9) {
+                discountPercent = 10;
+            } else if (duration >= 6) {
+                discountPercent = 5;
+            }
+            
+            let discountFactor = (100 - discountPercent) / 100;
+            let discountedMonthlyRate = monthlyRateCost * discountFactor;
+            
+            // Calculate total contract cost
+            let totalContractCost = discountedMonthlyRate * duration;
+            
+            // Calculate setup fee
+            let setupFee = 100 + (meters * 1);
+            setupFee = Math.min(setupFee, 300);
+            
+            // Calculate grand total
+            let grandTotal = totalContractCost + setupFee;
+            
+            // Display results
+            document.getElementById('meter-rate').textContent = rate.toFixed(2);
+            document.getElementById('monthly-cost').textContent = discountedMonthlyRate.toFixed(2);
+            document.getElementById('total-cost').textContent = totalContractCost.toFixed(2);
+            document.getElementById('setup-fee').textContent = setupFee.toFixed(2);
+            document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
+            document.getElementById('result').style.display = 'block';
+            
+            // Show breakdown
+            let breakdown = "<h4>Detailed Calculation</h4>";
+            breakdown += "<p><strong>Meter rate determination:</strong><br>";
+            breakdown += `Total meters: ${meters}<br>`;
+            breakdown += `Applicable rate: $${rate.toFixed(2)} per meter<br>`;
+            breakdown += `Monthly cost: ${meters} meters × $${rate.toFixed(2)} = $${monthlyRateCost.toFixed(2)}</p>`;
+            
+            if (discountPercent > 0) {
+                breakdown += `<p><strong>${duration}-month discount:</strong> ${discountPercent}%<br>`;
+                breakdown += `Discounted monthly rate: $${monthlyRateCost.toFixed(2)} × ${discountFactor} = $${discountedMonthlyRate.toFixed(2)}</p>`;
+            }
+            
+            breakdown += `<p><strong>Total contract:</strong> $${discountedMonthlyRate.toFixed(2)} × ${duration} months = $${totalContractCost.toFixed(2)}</p>`;
+            
+            breakdown += "<p><strong>Setup fee calculation:</strong><br>";
+            breakdown += `Base fee: $100<br>`;
+            breakdown += `Per meter fee: ${meters} meters × $1 = $${meters}<br>`;
+            breakdown += `Total setup fee (capped at $300): $${setupFee.toFixed(2)}</p>`;
+            
+            document.getElementById('breakdown').innerHTML = breakdown;
+        }
+    </script>
+</body>
+</html>
